@@ -80,7 +80,7 @@ flowchart TD
         C --> P[Prompt Assembly]
         P --> L[LLM Answer Generation<br/>Cohere / Gemini / OpenAI]
         G --> O[Output Guardrail]
-        L --> J{Groundedness Judge<br/>LLM-as-a-Judge}
+        L --> J{Faithfulness / Groundedness Scoring<br/>LLM-as-a-Judge}
         J -->|supported| O
         J -->|unsupported| F[Groundedness Refusal]
         X --> D[PII De-masking]
@@ -88,6 +88,10 @@ flowchart TD
         O --> D
         D --> LOG[Audit Log + Metrics + LangSmith]
         LOG --> RSP[Response Sent]
+        RSP --> FB[User Feedback<br/>thumbs up/down]
+        FB --> FDB[(SQLite Feedback Table)]
+        FDB --> EVAL[Offline Eval Suite<br/>Ragas faithfulness + relevancy]
+        EVAL -. improves tests and prompts .-> R
     end
 
     V --> SEARCH
@@ -277,6 +281,8 @@ artifacts/evaluation_results.md
 ```
 
 When Cohere is configured, the evaluator can also compute Ragas metrics such as faithfulness and answer relevancy. If external API keys are missing, parts of the app fall back to local/mock behavior where supported.
+
+Feedback submitted from the UI is stored through `/api/feedback` in SQLite. Those records can be reviewed alongside audit logs and used to expand future evaluation cases for weak retrieval, RBAC edge cases, or guardrail misses.
 
 ## Observability
 
