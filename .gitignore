@@ -1,0 +1,25 @@
+# Python environment
+venv/
+venv_broken/
+__pycache__/
+*.pyc
+
+# Local system files
+.DS_Store
+
+# Environments & API Keys (DO NOT COMMIT SENSITIVE KEYS)
+.env
+
+# Testing cache
+.pytest_cache/
+
+# Databases and Local Caches
+*.db
+data/chroma_db/
+data/qdrant_db/
+data/app_cache/
+
+# Optional local/project-submission notes
+SETUP.md
+REVIEW.md
+QUICKDEMO.md
