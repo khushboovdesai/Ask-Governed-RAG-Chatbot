@@ -19,6 +19,7 @@ import sys
 import json
 import pytest
 from typing import Dict
+from langchain_core.documents import Document
 
 # Ensure project root is in python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -26,7 +27,12 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.config import settings
 from app.security import pii_manager
 from app.database import init_db, log_feedback, log_interaction, get_db_connection
-from app.graph import compiled_graph, route_intent_conditional
+from app.graph import (
+    compiled_graph,
+    route_intent_conditional,
+    extract_direct_supported_answer,
+    is_direct_answer_supported,
+)
 
 # Initialize SQLite tables prior to executing test cases
 init_db()
@@ -166,3 +172,36 @@ def test_workflow_graph_compiles_successfully():
     """
     assert compiled_graph is not None
     assert hasattr(compiled_graph, "invoke")
+
+def test_manager_raise_cap_direct_answer_from_authorized_context():
+    """
+    Verifies that manager raise-cap wording is answered from the retrieved HR-303
+    salary-adjustment chunk instead of falling through to source coverage refusal.
+    """
+    docs = [
+        Document(
+            page_content=(
+                "Company: AuraTech\n"
+                "Department: Human Resources\n"
+                "Policy: Performance Management and Compensation Adjustments (ID: HR-303)\n"
+                "Section: Salary Adjustments and Promotion Triggers\n"
+                "Content: Discretionary salary increases are capped at 8% annually."
+            ),
+            metadata={
+                "policy_id": "HR-303",
+                "section_title": "Salary Adjustments and Promotion Triggers",
+                "source": "hr_policy.xml",
+                "min_permission_level": 3,
+            },
+        )
+    ]
+
+    answer = extract_direct_supported_answer(
+        "What is the budget limit for manager salary raises?",
+        docs,
+    )
+
+    assert answer is not None
+    assert "8% annually" in answer
+    assert "HR-303" in answer
+    assert is_direct_answer_supported(answer, docs)
