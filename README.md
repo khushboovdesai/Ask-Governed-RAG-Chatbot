@@ -62,15 +62,24 @@ AskGovRAGBot is structured around a gated RAG workflow with the following core c
 
 ```mermaid
 flowchart TD
-    U[User Query] --> M[PII Masking]
-    M --> R[Intent Routing]
-    R -->|policy_qa| A[Expert Retrieval]
-    R -->|general_chat| C[General Chat Node]
-    A --> S[QA Synthesis]
-    C --> O[Output Guardrail]
-    S --> O
-    O --> D[PII De-masking]
-    D --> RSP[Response Sent]
+    U[User Query from UI or API] --> M[PII Masking]
+    M --> R{Intent Routing<br/>LLM or deterministic fallback}
+    R -->|refused| X[Safety Refusal]
+    R -->|general_chat| G[LLM Chat Generation<br/>Cohere / Gemini / OpenAI]
+    R -->|policy_qa| A[RBAC Filter Builder]
+    A --> V[(Vector DB<br/>Chroma / Pinecone)]
+    V --> C[Authorized Retrieved Context]
+    C --> P[Prompt Assembly]
+    P --> L[LLM Answer Generation<br/>Cohere / Gemini / OpenAI]
+    G --> O[Output Guardrail]
+    L --> J{Groundedness Judge<br/>LLM-as-a-Judge}
+    J -->|supported| O
+    J -->|unsupported| F[Groundedness Refusal]
+    X --> D[PII De-masking]
+    F --> D
+    O --> D
+    D --> LOG[Audit Log + Metrics + LangSmith]
+    LOG --> RSP[Response Sent]
 ```
 
 ## Repo Structure
