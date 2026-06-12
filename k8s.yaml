@@ -1,0 +1,94 @@
+# =============================================================================
+# AskGovRAGBot Kubernetes Deployment & Service Manifest
+# =============================================================================
+# This descriptor defines the resources needed to deploy and route AskGovRAGBot
+# inside a production-grade Kubernetes cluster.
+#
+# Resources declared:
+# -------------------
+# 1. Deployment: Defines replica counts (2), rolling update strategy, container specs,
+#    CPU/Memory resources, and standard health/liveness probes.
+# 2. Service: Exposes a NodePort service mapping port 80 to the target container port 8000.
+#
+# Prometheus auto-discovery:
+# --------------------------
+# Includes annotations mapping prometheus.io/scrape to ensure the metrics agent
+# automatically locates the target /metrics endpoint.
+# =============================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: askgovragbot-deployment
+  labels:
+    app: askgovragbot
+spec:
+  replicas: 2                   # Scale to 2 pods for high availability load balancing
+  selector:
+    matchLabels:
+      app: askgovragbot
+  strategy:
+    type: RollingUpdate         # Graceful zero-downtime hot redeployment updates
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: askgovragbot
+      annotations:
+        prometheus.io/scrape: "true"   # Tells Prometheus daemon to collect metrics here
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "8000"
+    spec:
+      containers:
+        - name: askgovragbot-app
+          image: askgovragbot:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: VECTOR_STORE
+              value: "chroma"
+            - name: LLM_PROVIDER
+              value: "gemini"
+            - name: LLM_MODEL
+              value: "gemini-1.5-flash"
+            - name: EMBEDDING_PROVIDER
+              value: "local"
+          resources:
+            requests:
+              memory: "512Mi"   # Minimum resource requirements allocated on scheduler placement
+              cpu: "250m"
+            limits:
+              memory: "1Gi"     # Maximum resource limits before triggering OOMKills
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: askgovragbot-service
+  labels:
+    app: askgovragbot
+spec:
+  type: NodePort                # Exposes the service to external cluster node IP addresses
+  selector:
+    app: askgovragbot
+  ports:
+    - port: 80                  # External routing port
+      targetPort: 8000          # Internal container target port
+      nodePort: 30080           # Pin standard entry node port for simple test routing

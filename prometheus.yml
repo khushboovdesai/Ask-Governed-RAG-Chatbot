@@ -1,0 +1,25 @@
+# =============================================================================
+# AskGovRAGBot Prometheus Scraper Configuration
+# =============================================================================
+# This configuration file instructs Prometheus on how to pull telemetry and performance
+# metrics from the AskGovRAGBot backend FastAPI server.
+#
+# Key scrape target:
+# ------------------
+# - Port: 8000 (FastAPI ASGI endpoint on the host machine)
+# - Path: /metrics (Exposes custom Counter/Histogram variables)
+# - Scrape Interval: 5 seconds (High resolution for local development profiling)
+# =============================================================================
+
+global:
+  scrape_interval: 5s     # How frequently to poll targets for metrics
+  evaluation_interval: 5s # How frequently to evaluate alert rules
+
+scrape_configs:
+  - job_name: 'askgovragbot-backend'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['host.docker.internal:8000']
+        labels:
+          environment: 'development'
+          service: 'askgovragbot'
