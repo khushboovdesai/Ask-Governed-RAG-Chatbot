@@ -62,24 +62,35 @@ AskGovRAGBot is structured around a gated RAG workflow with the following core c
 
 ```mermaid
 flowchart TD
-    U[User Query from UI or API] --> M[PII Masking]
-    M --> R{Intent Routing<br/>LLM or deterministic fallback}
-    R -->|refused| X[Safety Refusal]
-    R -->|general_chat| G[LLM Chat Generation<br/>Cohere / Gemini / OpenAI]
-    R -->|policy_qa| A[RBAC Filter Builder]
-    A --> V[(Vector DB<br/>Chroma / Pinecone)]
-    V --> C[Authorized Retrieved Context]
-    C --> P[Prompt Assembly]
-    P --> L[LLM Answer Generation<br/>Cohere / Gemini / OpenAI]
-    G --> O[Output Guardrail]
-    L --> J{Groundedness Judge<br/>LLM-as-a-Judge}
-    J -->|supported| O
-    J -->|unsupported| F[Groundedness Refusal]
-    X --> D[PII De-masking]
-    F --> D
-    O --> D
-    D --> LOG[Audit Log + Metrics + LangSmith]
-    LOG --> RSP[Response Sent]
+    subgraph INGEST[Knowledge Base Build - Offline Ingestion]
+        SRC[Policy Sources<br/>XML + JSON] --> PARSE[Tag-aware Parser]
+        PARSE --> CHUNK[Structured Chunks<br/>policy_id + section + RBAC metadata]
+        CHUNK --> EMB[Embedding Provider<br/>Cohere / OpenAI / Local]
+        EMB --> V[(Vector DB<br/>Chroma / Pinecone)]
+    end
+
+    subgraph CHAT[Governed Chat Runtime]
+        U[User Query from UI or API] --> M[PII Masking]
+        M --> R{Intent Routing<br/>LLM or deterministic fallback}
+        R -->|refused| X[Safety Refusal]
+        R -->|general_chat| G[LLM Chat Generation<br/>Cohere / Gemini / OpenAI]
+        R -->|policy_qa| A[RBAC Filter Builder]
+        A --> SEARCH[Semantic Search<br/>with permission filter]
+        SEARCH --> C[Authorized Retrieved Context]
+        C --> P[Prompt Assembly]
+        P --> L[LLM Answer Generation<br/>Cohere / Gemini / OpenAI]
+        G --> O[Output Guardrail]
+        L --> J{Groundedness Judge<br/>LLM-as-a-Judge}
+        J -->|supported| O
+        J -->|unsupported| F[Groundedness Refusal]
+        X --> D[PII De-masking]
+        F --> D
+        O --> D
+        D --> LOG[Audit Log + Metrics + LangSmith]
+        LOG --> RSP[Response Sent]
+    end
+
+    V --> SEARCH
 ```
 
 ## Repo Structure
