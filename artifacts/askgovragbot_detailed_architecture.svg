@@ -1,0 +1,264 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350" role="img" aria-labelledby="title desc">
+  <title id="title">AskGovRAGBot Governed RAG Architecture</title>
+  <desc id="desc">A LinkedIn-ready architecture diagram for AskGovRAGBot showing PII masking, LangGraph routing, RBAC retrieval, vector search, LLM generation, groundedness guardrails, local de-masking, feedback, observability, evals, and fail-safe fallbacks.</desc>
+
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#07131f"/>
+      <stop offset="55%" stop-color="#0b1726"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="nodeGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f2a3a"/>
+      <stop offset="100%" stop-color="#0c1f33"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="55%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#2dd4bf"/>
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#fb7185"/>
+    </linearGradient>
+    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M 36 0 L 0 0 0 36" fill="none" stroke="#1f3b52" stroke-width="0.7" opacity="0.42"/>
+    </pattern>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrowAmber" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#fbbf24"/>
+    </marker>
+
+    <style>
+      .title { font: 800 58px Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; fill: #e5f6ff; letter-spacing: 0; }
+      .subtitle { font: 500 23px Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; fill: #9cc7db; letter-spacing: 0; }
+      .section { font: 800 20px Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; fill: #dff7ff; letter-spacing: 0; }
+      .nodeTitle { font: 800 20px Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; fill: #f2fbff; letter-spacing: 0; }
+      .nodeSub { font: 500 14px Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; fill: #a7c5d6; letter-spacing: 0; }
+      .small { font: 600 13px Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; fill: #b9d8e8; letter-spacing: 0; }
+      .tiny { font: 600 12px Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; fill: #b8d1df; letter-spacing: 0; }
+      .chip { font: 700 12px Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; fill: #ddf7ff; letter-spacing: 0; }
+      .muted { fill: #7ea6ba; }
+      .card { fill: rgba(13, 31, 49, 0.92); stroke: #1d4b63; stroke-width: 1.2; }
+      .node { fill: url(#nodeGrad); stroke: #2b87a4; stroke-width: 1.5; }
+      .nodeHot { fill: #132338; stroke: #fbbf24; stroke-width: 1.5; }
+      .line { fill: none; stroke: #38bdf8; stroke-width: 2.5; marker-end: url(#arrow); }
+      .lineThin { fill: none; stroke: #2dd4bf; stroke-width: 1.8; marker-end: url(#arrow); opacity: 0.9; }
+      .lineAmber { fill: none; stroke: #fbbf24; stroke-width: 2; marker-end: url(#arrowAmber); }
+      .dash { fill: none; stroke: #38bdf8; stroke-width: 1.6; stroke-dasharray: 6 7; opacity: 0.55; }
+      .icon { fill: none; stroke: #67e8f9; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+      .iconAmber { fill: none; stroke: #fbbf24; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <rect width="1080" height="1350" fill="url(#bg)"/>
+  <rect width="1080" height="1350" fill="url(#grid)" opacity="0.5"/>
+  <circle cx="165" cy="130" r="190" fill="#0ea5e9" opacity="0.08"/>
+  <circle cx="940" cy="260" r="220" fill="#14b8a6" opacity="0.06"/>
+
+  <text x="60" y="82" class="title">AskGovRAGBot</text>
+  <text x="62" y="122" class="subtitle">Governed RAG: Privacy, RBAC, Guardrails, Evals, Observability</text>
+  <rect x="60" y="146" width="960" height="4" rx="2" fill="url(#accentGrad)" filter="url(#softGlow)"/>
+
+  <!-- Orchestration band -->
+  <rect x="60" y="178" width="960" height="95" rx="18" class="card"/>
+  <text x="86" y="213" class="section">Runtime orchestration</text>
+  <g transform="translate(86 231)">
+    <rect width="210" height="28" rx="14" fill="#0f3245" stroke="#2b87a4"/>
+    <text x="16" y="19" class="chip">LangGraph state machine</text>
+  </g>
+  <g transform="translate(318 231)">
+    <rect width="230" height="28" rx="14" fill="#0f3245" stroke="#2b87a4"/>
+    <text x="16" y="19" class="chip">LangChain model adapters</text>
+  </g>
+  <g transform="translate(570 231)">
+    <rect width="218" height="28" rx="14" fill="#0f3245" stroke="#2b87a4"/>
+    <text x="16" y="19" class="chip">Pydantic API schemas</text>
+  </g>
+  <g transform="translate(810 231)">
+    <rect width="178" height="28" rx="14" fill="#0f3245" stroke="#2b87a4"/>
+    <text x="16" y="19" class="chip">FastAPI async API</text>
+  </g>
+
+  <!-- Pipeline nodes -->
+  <g id="pipeline">
+    <!-- Row 1 -->
+    <g transform="translate(60 320)">
+      <rect width="285" height="105" rx="16" class="node"/>
+      <path class="icon" d="M30 31 h44 a12 12 0 0 1 12 12 v14 a12 12 0 0 1 -12 12 h-22 l-18 14 v-14 h-4 a12 12 0 0 1 -12 -12 v-14 a12 12 0 0 1 12 -12 z"/>
+      <text x="105" y="42" class="nodeTitle">User Query</text>
+      <text x="105" y="68" class="nodeSub">raw prompt + user role</text>
+    </g>
+    <g transform="translate(397 320)">
+      <rect width="285" height="105" rx="16" class="node"/>
+      <path class="icon" d="M52 24 l35 13 v24 c0 22 -15 36 -35 45 c-20 -9 -35 -23 -35 -45 v-24 z"/>
+      <path class="icon" d="M39 59 l9 9 l20 -24"/>
+      <text x="105" y="38" class="nodeTitle">PII Masking</text>
+      <text x="105" y="64" class="nodeSub">Presidio + custom Regex</text>
+      <text x="105" y="86" class="nodeSub">tokens before LLM calls</text>
+    </g>
+    <g transform="translate(734 320)">
+      <rect width="285" height="105" rx="16" class="node"/>
+      <path class="icon" d="M24 40 h32 c22 0 25 30 47 30 h18"/>
+      <path class="icon" d="M82 55 l20 15 l-20 15"/>
+      <path class="icon" d="M24 78 h32 c16 0 19 -18 34 -25"/>
+      <text x="105" y="38" class="nodeTitle">Intent Router</text>
+      <text x="105" y="64" class="nodeSub">policy_qa, general_chat</text>
+      <text x="105" y="86" class="nodeSub">or refused</text>
+    </g>
+
+    <!-- Row 2 -->
+    <g transform="translate(60 500)">
+      <rect width="285" height="105" rx="16" class="node"/>
+      <path class="icon" d="M34 66 a24 24 0 1 1 22 14"/>
+      <path class="icon" d="M54 68 h54 m-17 0 v16 m-19 -16 v12"/>
+      <text x="105" y="38" class="nodeTitle">RBAC Retrieval</text>
+      <text x="105" y="64" class="nodeSub">min_permission &lt;= role</text>
+      <text x="105" y="86" class="nodeSub">Contractor to Admin</text>
+    </g>
+    <g transform="translate(397 500)">
+      <rect width="285" height="105" rx="16" class="node"/>
+      <ellipse cx="52" cy="35" rx="34" ry="12" class="icon"/>
+      <path class="icon" d="M18 35 v42 c0 7 15 13 34 13 s34 -6 34 -13 v-42"/>
+      <path class="icon" d="M18 56 c0 7 15 13 34 13 s34 -6 34 -13"/>
+      <text x="105" y="34" class="nodeTitle">Vector Search</text>
+      <text x="105" y="60" class="nodeSub">similarity_search k=4</text>
+      <text x="105" y="82" class="nodeSub">cosine + metadata filters</text>
+    </g>
+    <g transform="translate(734 500)">
+      <rect width="285" height="105" rx="16" class="node"/>
+      <rect x="23" y="28" width="58" height="58" rx="12" class="icon"/>
+      <path class="icon" d="M38 19 v13 m28 -13 v13 m-28 54 v13 m28 -13 v13 m-52 -57 h13 m54 0 h13 m-67 28 h-13 m67 0 h13"/>
+      <path class="icon" d="M42 57 c0 -12 20 -12 20 0 c0 12 -20 12 -20 0"/>
+      <text x="105" y="38" class="nodeTitle">LLM Generation</text>
+      <text x="105" y="64" class="nodeSub">grounded policy answer</text>
+      <text x="105" y="86" class="nodeSub">LangChain chat models</text>
+    </g>
+
+    <!-- Row 3 -->
+    <g transform="translate(60 680)">
+      <rect width="285" height="105" rx="16" class="nodeHot"/>
+      <path class="iconAmber" d="M52 24 l35 13 v24 c0 22 -15 36 -35 45 c-20 -9 -35 -23 -35 -45 v-24 z"/>
+      <path class="iconAmber" d="M36 59 l11 12 l24 -29"/>
+      <text x="105" y="31" class="nodeTitle">Groundedness</text>
+      <text x="105" y="55" class="nodeTitle">Guardrail</text>
+      <text x="105" y="78" class="nodeSub">LLM-as-judge</text>
+      <text x="105" y="97" class="nodeSub">fail closed</text>
+    </g>
+    <g transform="translate(397 680)">
+      <rect width="285" height="105" rx="16" class="node"/>
+      <path class="icon" d="M35 53 v-11 a19 19 0 0 1 37 -6"/>
+      <rect x="25" y="53" width="58" height="42" rx="10" class="icon"/>
+      <path class="icon" d="M54 67 v12"/>
+      <text x="105" y="34" class="nodeTitle">Local PII De-masking</text>
+      <text x="105" y="60" class="nodeSub">restore mapping locally</text>
+      <text x="105" y="82" class="nodeSub">no provider call here</text>
+    </g>
+    <g transform="translate(734 680)">
+      <rect width="285" height="105" rx="16" class="node"/>
+      <path class="icon" d="M28 29 h52 a10 10 0 0 1 10 10 v36 a10 10 0 0 1 -10 10 h-30 l-22 16 v-16 a10 10 0 0 1 -10 -10 v-36 a10 10 0 0 1 10 -10 z"/>
+      <path class="icon" d="M40 50 h34 m-34 18 h24"/>
+      <text x="105" y="42" class="nodeTitle">Final Answer</text>
+      <text x="105" y="68" class="nodeSub">response + run metadata</text>
+    </g>
+
+    <!-- Pipeline arrows -->
+    <path class="line" d="M345 372 H392"/>
+    <path class="line" d="M682 372 H729"/>
+    <path class="line" d="M876 425 C876 462 202 462 202 495"/>
+    <path class="line" d="M345 552 H392"/>
+    <path class="line" d="M682 552 H729"/>
+    <path class="line" d="M876 605 C876 642 202 642 202 675"/>
+    <path class="line" d="M345 732 H392"/>
+    <path class="line" d="M682 732 H729"/>
+  </g>
+
+  <!-- Ingestion and retrieval details -->
+  <rect x="60" y="835" width="455" height="180" rx="18" class="card"/>
+  <text x="86" y="871" class="section">Ingestion and retrieval</text>
+  <g transform="translate(86 895)">
+    <rect width="158" height="28" rx="14" fill="#0f3245" stroke="#2b87a4"/>
+    <text x="14" y="19" class="chip">Tag-aware chunking</text>
+  </g>
+  <g transform="translate(258 895)">
+    <rect width="190" height="28" rx="14" fill="#0f3245" stroke="#2b87a4"/>
+    <text x="14" y="19" class="chip">XML ElementTree + JSON</text>
+  </g>
+  <text x="86" y="946" class="small">Metadata: policy_id, section_title, source, category</text>
+  <text x="86" y="974" class="small">Access field: min_permission_level</text>
+  <text x="86" y="1002" class="small">Retrieval: similarity_search(k=4) + RBAC metadata filters</text>
+
+  <!-- Fallback details -->
+  <rect x="565" y="835" width="455" height="180" rx="18" class="card"/>
+  <text x="591" y="871" class="section">Fail-safe fallbacks</text>
+  <text x="591" y="904" class="small">LLM: Gemini / OpenAI / Cohere / Nebius / Offline</text>
+  <text x="591" y="932" class="small">Vector DB: Pinecone -&gt; Qdrant -&gt; Chroma</text>
+  <text x="591" y="960" class="small">Embeddings: Cohere / OpenAI / Local BGE</text>
+  <text x="591" y="988" class="small">Offline embeddings: deterministic pseudo vectors</text>
+  <text x="591" y="1012" class="small">PII: Presidio -&gt; Regex fallback</text>
+
+  <!-- Rate limit and bounded badge -->
+  <g transform="translate(60 1027)">
+    <rect width="455" height="58" rx="18" fill="#172033" stroke="#fbbf24" stroke-width="1.4"/>
+    <text x="24" y="24" class="section">Rate-limit aware embeddings</text>
+    <text x="24" y="45" class="small">Sequential throttling keeps Cohere calls below RPM limits.</text>
+  </g>
+  <g transform="translate(565 1027)">
+    <rect width="455" height="58" rx="18" fill="#172033" stroke="#fbbf24" stroke-width="1.4"/>
+    <text x="24" y="24" class="section">Bounded by design</text>
+    <text x="24" y="45" class="small">No endless LLM loop. One guarded pass, then fail closed.</text>
+  </g>
+
+  <!-- Feedback loop -->
+  <path class="lineAmber" d="M876 785 C940 850 946 940 898 1128"/>
+  <rect x="734" y="796" width="285" height="32" rx="16" fill="#1a2538" stroke="#fbbf24" stroke-width="1.3"/>
+  <text x="760" y="817" class="small">Feedback: thumbs up/down + comments</text>
+
+  <!-- Observability and evals -->
+  <rect x="60" y="1130" width="960" height="165" rx="22" class="card"/>
+  <text x="86" y="1167" class="section">Observability, audit, and evaluation layer</text>
+  <path class="dash" d="M202 785 V1125"/>
+  <path class="dash" d="M540 785 V1125"/>
+  <path class="dash" d="M876 990 V1125"/>
+
+  <g transform="translate(86 1190)">
+    <rect width="215" height="78" rx="16" fill="#10283a" stroke="#2b87a4"/>
+    <text x="24" y="29" class="nodeTitle">Prometheus</text>
+    <text x="24" y="53" class="tiny">requests, latency, PII</text>
+    <text x="24" y="68" class="tiny">hallucination blocks</text>
+  </g>
+  <g transform="translate(319 1190)">
+    <rect width="215" height="78" rx="16" fill="#10283a" stroke="#2b87a4"/>
+    <path class="icon" d="M24 54 c18 -30 39 -30 58 0"/>
+    <path class="icon" d="M24 54 c18 12 39 12 58 0"/>
+    <circle cx="53" cy="42" r="5" fill="#67e8f9"/>
+    <text x="90" y="29" class="nodeTitle">LangSmith</text>
+    <text x="90" y="53" class="tiny">node path tracing</text>
+    <text x="90" y="68" class="tiny">LLM calls and latency</text>
+  </g>
+  <g transform="translate(552 1190)">
+    <rect width="215" height="78" rx="16" fill="#10283a" stroke="#2b87a4"/>
+    <ellipse cx="42" cy="29" rx="26" ry="9" class="icon"/>
+    <path class="icon" d="M16 29 v28 c0 5 12 10 26 10 s26 -5 26 -10 v-28"/>
+    <text x="82" y="29" class="nodeTitle">SQLite Ledger</text>
+    <text x="82" y="53" class="tiny">audit_trail</text>
+    <text x="82" y="68" class="tiny">feedback_loop + cache</text>
+  </g>
+  <g transform="translate(785 1190)">
+    <rect width="209" height="78" rx="16" fill="#10283a" stroke="#2b87a4"/>
+    <text x="24" y="29" class="nodeTitle">Ragas + pytest</text>
+    <text x="24" y="53" class="tiny">faithfulness, relevancy</text>
+    <text x="24" y="68" class="tiny">guardrail tests</text>
+  </g>
+
+  <text x="60" y="1320" class="tiny muted">Editable SVG asset. Import into Figma, Canva, Keynote, or PowerPoint for final brand tweaks.</text>
+</svg>
