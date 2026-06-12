@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<developer_handbook company="AuraTech" department="Engineering">
+    <title>AuraTech Software Development Lifecycle Handbook</title>
+    <version>2.4</version>
+
+    <!-- Level 2: Standard Employee / Developer Access -->
+    <policy id="DEV-101" title="Git Branching and Release Procedures" min_permission="2">
+        <summary>Outlines the branching naming conventions, code reviews, and release deployment schedule.</summary>
+        <section title="Git Branching Model">
+            We follow GitFlow. Developers must create feature branches off the 'develop' branch. Feature branch naming conventions are: feature/[issue-number]-short-description. Direct commits to 'develop' or 'main' are blocked by branch protection rules.
+        </section>
+        <section title="Code Reviews and PR Approval">
+            Every Pull Request (PR) requires at least two approvals from senior engineers. The build pipeline must pass all automated test gates, including a 90% code coverage threshold, before a PR can be merged.
+        </section>
+        <section title="Release Management Schedule">
+            Releases to the production cluster occur bi-weekly on Wednesday mornings at 5:00 AM UTC. Deployment coordination is managed by the Release Engineer, Thomas Lee, who can be reached at thomas.lee@auratech.com or desk phone 555-013-1122.
+        </section>
+    </policy>
+</developer_handbook>

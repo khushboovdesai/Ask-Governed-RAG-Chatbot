@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<policy_document company="AuraTech" department="Human Resources">
+    <title>Global Employee and Operational Policies Handbook</title>
+    <version>2026.1</version>
+    
+    <!-- Level 1: Contractor & Standard Access -->
+    <policy id="HR-101" title="General Code of Conduct" min_permission="1">
+        <summary>This policy sets the foundational behaviors expected of all AuraTech workforce members, including full-time employees, part-time staff, and external contractors.</summary>
+        <section title="Professional Behavior">
+            All personnel must perform their duties in a professional and ethical manner. We maintain a zero-tolerance policy for harassment, discrimination, or intimidation. For any inquiries, please contact our general workplace support team at support@auratech.com or call 555-019-8800.
+        </section>
+        <section title="Office Access">
+            Contractors and temporary staff are issued a blue badge. Office access is limited to standard business hours (8:00 AM to 6:00 PM local time) unless pre-authorized by a project manager.
+        </section>
+    </policy>
+
+    <!-- Level 2: Standard Employee Access -->
+    <policy id="HR-202" title="Hybrid Work and PTO Allowance" min_permission="2">
+        <summary>Defines hybrid work schedules, remote setup allowances, and Paid Time Off (PTO) tracking for full-time employees.</summary>
+        <section title="Hybrid Schedule">
+            Full-time employees are eligible for a hybrid working arrangement. Employees are expected to work from an AuraTech corporate office at least 2 days per week (typically Tuesdays and Thursdays). For remote work setups, employees receive a one-time stipend of $500.
+        </section>
+        <section title="PTO Accrual">
+            Standard full-time employees accrue 15 days of Paid Time Off (PTO) annually, accrued monthly at a rate of 1.25 days. All PTO requests must be submitted through the Employee Portal at least 5 business days in advance.
+        </section>
+        <section title="Emergency Contact">
+            For critical HR emergencies or leave queries, contact the HR Benefits Specialist, Sarah Jenkins, at sarah.jenkins@auratech.com or call her desk phone at 555-014-9922.
+        </section>
+    </policy>
+
+    <!-- Level 3: Manager Access Only -->
+    <policy id="HR-303" title="Performance Management and Compensation Adjustments" min_permission="3">
+        <summary>Procedures and policies governing annual performance appraisals, promotion triggers, and discretionary salary adjustments.</summary>
+        <section title="Annual Performance Appraisals">
+            Managers must complete annual performance appraisals for all direct reports by November 30th. Appraisals are graded on a scale of 1 (Needs Development) to 5 (Outstanding). Reviews are stored securely in the HR system.
+        </section>
+        <section title="Salary Adjustments and Promotion Triggers">
+            Discretionary salary adjustments must be approved by the Department VP and HR Director, Marcus Sterling (marcus.sterling@auratech.com, office line: 555-011-4477). Discretionary salary increases are capped at 8% annually. Promotions require a minimum of 12 months in the current role and an appraisal grade of 4 or higher.
+        </section>
+        <section title="Disciplinary Procedures">
+            If a direct report is underperforming, the manager must implement a formal 30-day Performance Improvement Plan (PIP) in consultation with the Employee Relations Lead, David Ross (david.ross@auratech.com).
+        </section>
+    </policy>
+</policy_document>

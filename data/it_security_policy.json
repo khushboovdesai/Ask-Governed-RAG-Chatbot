@@ -1,0 +1,39 @@
+{
+  "document_title": "AuraTech IT Security Guidelines and Credentials Guide",
+  "document_version": "2026.1",
+  "last_updated": "2026-03-15",
+  "policies": [
+    {
+      "id": "IT-101",
+      "title": "Device Passcode and Authentication Requirements",
+      "min_permission": 2,
+      "summary": "Mandatory standards for secure passwords, biometrics, and multi-factor authentication (MFA).",
+      "sections": [
+        {
+          "name": "Password Complexity",
+          "content": "All company-issued laptops and devices must have passcodes of at least 12 characters, including upper case, lower case, numbers, and symbols. Passwords must be rotated every 90 days. Reusing the last 4 passwords is prohibited."
+        },
+        {
+          "name": "Multi-Factor Authentication (MFA)",
+          "content": "MFA is required for all access to internal corporate systems. Employees must register their mobile device using Google Authenticator or Okta Verify. For security token resets, contact the Helpdesk lead, Robert Miller (robert.miller@auratech.com, desk phone: 555-015-7733)."
+        }
+      ]
+    },
+    {
+      "id": "IT-999",
+      "title": "Administrative Access Keys and Server Details",
+      "min_permission": 4,
+      "summary": "Confidential API gateways, admin database ports, and master encryption guidelines.",
+      "sections": [
+        {
+          "name": "Database Admin Portals",
+          "content": "Access to the AuraTech primary database instance (IP: 10.192.11.45) is restricted to Database Administrators. The default port is 5432. The database admin credentials are kept in the HashiCorp vault."
+        },
+        {
+          "name": "Master API Gateway Configuration",
+          "content": "For integration, the master dev environment API key is AT-SECURE-APIKEY-99228811XX. In case of API credentials leakage, immediately contact the Chief Security Officer (CSO), Clara Vance, at clara.vance@auratech.com or call the Security Operations Center (SOC) at 555-019-9111."
+        }
+      ]
+    }
+  ]
+}
