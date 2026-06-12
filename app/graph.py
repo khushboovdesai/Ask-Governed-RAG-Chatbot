@@ -87,6 +87,17 @@ def classify_intent_deterministically(masked_query: str) -> str:
 
     return "general_chat"
 
+def summarize_model_error(error: Exception) -> str:
+    """Returns a concise provider error summary without dumping raw API payloads."""
+    text = str(error).lower()
+    if "resource_exhausted" in text or "quota" in text or "429" in text:
+        return "Gemini quota/rate limit reached"
+    if "unavailable" in text or "503" in text or "high demand" in text:
+        return "Gemini temporarily unavailable or under high demand"
+    if "not_found" in text or "404" in text:
+        return "configured Gemini model was not found"
+    return error.__class__.__name__
+
 def pii_masking_node(state: AgentState) -> Dict[str, Any]:
     """Scans and masks PII in the query using PIISecurityManager."""
     query = state.get("query", "")
@@ -139,7 +150,10 @@ def intent_routing_node(state: AgentState) -> Dict[str, Any]:
             data = json.loads(content)
             intent = data.get("intent", "general_chat")
         except Exception as e:
-            print(f"[WARNING] Intent routing failed ({e}). Falling back to deterministic routing.")
+            print(
+                "[WARNING] Intent routing failed "
+                f"({summarize_model_error(e)}). Falling back to deterministic routing."
+            )
             intent = classify_intent_deterministically(masked_query)
             
     return {
@@ -280,7 +294,7 @@ def qa_synthesis_node(state: AgentState) -> Dict[str, Any]:
         ])
         answer = response.content
     except Exception as e:
-        print(f"[WARNING] QA synthesis model call failed ({e}).")
+        print(f"[WARNING] QA synthesis model call failed ({summarize_model_error(e)}).")
         answer = MODEL_UNAVAILABLE_RESPONSE
         
     return {
@@ -306,7 +320,7 @@ def general_chat_node(state: AgentState) -> Dict[str, Any]:
         ])
         answer = response.content
     except Exception as e:
-        print(f"[WARNING] General chat model call failed ({e}).")
+        print(f"[WARNING] General chat model call failed ({summarize_model_error(e)}).")
         answer = MODEL_UNAVAILABLE_RESPONSE
         
     return {
@@ -397,7 +411,10 @@ def output_guardrail_node(state: AgentState) -> Dict[str, Any]:
             score = float(data.get("score", 0.0))
             is_grounded = bool(data.get("is_grounded", False))
         except Exception as e:
-            print(f"[WARNING] Groundedness evaluator failed ({e}). Defaulting to True.")
+            print(
+                "[WARNING] Groundedness evaluator failed "
+                f"({summarize_model_error(e)}). Defaulting to True."
+            )
             score = 1.0
             is_grounded = True
             

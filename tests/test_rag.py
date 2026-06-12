@@ -32,6 +32,7 @@ from app.graph import (
     classify_intent_deterministically,
     compiled_graph,
     general_chat_node,
+    summarize_model_error,
     route_intent_conditional,
     extract_direct_supported_answer,
     is_direct_answer_supported,
@@ -132,6 +133,22 @@ def test_model_failure_returns_safe_availability_message(monkeypatch):
 
     assert result["generated_answer"] == MODEL_UNAVAILABLE_RESPONSE
     assert "503" not in result["generated_answer"]
+
+def test_model_error_summary_redacts_provider_payload():
+    """
+    Ensures server logs summarize provider failures without dumping raw quota JSON.
+    """
+    raw_error = RuntimeError(
+        "Error calling model 'gemini-2.5-flash' (RESOURCE_EXHAUSTED): "
+        "429 RESOURCE_EXHAUSTED. {'error': {'message': 'quota exceeded', "
+        "'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}}"
+    )
+
+    summary = summarize_model_error(raw_error)
+
+    assert summary == "Gemini quota/rate limit reached"
+    assert "https://" not in summary
+    assert "gemini-2.5-flash" not in summary
 
 # =============================================================================
 # 3. DATABASE LEDGER PERSISTENCE TESTS
