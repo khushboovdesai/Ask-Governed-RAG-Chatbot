@@ -254,3 +254,39 @@ def test_manager_raise_cap_direct_answer_from_authorized_context():
     assert "8% annually" in answer
     assert "HR-303" in answer
     assert is_direct_answer_supported(answer, docs)
+
+def test_pii_benefits_contact_direct_answer_from_authorized_context():
+    """
+    Verifies that PII-heavy benefits/contact wording is answered from the
+    authorized HR-202 contact chunk instead of falling through to source coverage.
+    """
+    docs = [
+        Document(
+            page_content=(
+                "Company: AuraTech\n"
+                "Department: Human Resources\n"
+                "Policy: Hybrid Work and PTO Allowance (ID: HR-202)\n"
+                "Section: Emergency Contact\n"
+                "Content: For critical HR emergencies or leave queries, contact the HR "
+                "Benefits Specialist, Sarah Jenkins, at sarah.jenkins@auratech.com or "
+                "call her desk phone at 555-014-9922."
+            ),
+            metadata={
+                "policy_id": "HR-202",
+                "section_title": "Emergency Contact",
+                "source": "hr_policy.xml",
+                "min_permission_level": 2,
+            },
+        )
+    ]
+
+    masked_text, _ = pii_manager.mask_pii(
+        "Help me contact HR manager John Doe at john.doe@auratech.com about benefits via employee role"
+    )
+    answer = extract_direct_supported_answer(masked_text, docs)
+
+    assert answer is not None
+    assert "HR-202" in answer
+    assert "Sarah Jenkins" in answer
+    assert "sarah.jenkins@auratech.com" in answer
+    assert is_direct_answer_supported(answer, docs)

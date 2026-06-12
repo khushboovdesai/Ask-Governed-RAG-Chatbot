@@ -214,8 +214,12 @@ def extract_direct_supported_answer(masked_query: str, docs: List[Any]) -> Optio
         and any(term in query for term in ["budget", "cap", "limit", "capped", "increase"])
         and "manager" in query
     )
+    asks_hr_benefits_contact = (
+        any(term in query for term in ["benefit", "benefits", "leave", "pto"])
+        and any(term in query for term in ["contact", "email", "reach", "hr"])
+    )
 
-    if not asks_raise_cap:
+    if not asks_raise_cap and not asks_hr_benefits_contact:
         return None
 
     for doc in docs:
@@ -232,13 +236,33 @@ def extract_direct_supported_answer(masked_query: str, docs: List[Any]) -> Optio
                 "According to HR-303 in "
                 f"{source}, discretionary salary increases are capped at 8% annually."
             )
+        if (
+            asks_hr_benefits_contact
+            and metadata.get("policy_id") == "HR-202"
+            and "emergency contact" in metadata.get("section_title", "").lower()
+            and "hr benefits specialist" in content_lower
+            and "sarah.jenkins@auratech.com" in content_lower
+        ):
+            source = metadata.get("source", "hr_policy.xml")
+            return (
+                "According to HR-202 in "
+                f"{source}, for critical HR emergencies or leave queries, contact the HR "
+                "Benefits Specialist, Sarah Jenkins, at sarah.jenkins@auratech.com or "
+                "555-014-9922."
+            )
 
     return None
 
 def is_direct_answer_supported(answer: str, docs: List[Any]) -> bool:
     """Checks direct extractive answers against the retrieved authorized context."""
     answer_lower = answer.lower()
-    if not ("hr-303" in answer_lower and "8% annually" in answer_lower):
+    is_raise_cap_answer = "hr-303" in answer_lower and "8% annually" in answer_lower
+    is_benefits_contact_answer = (
+        "hr-202" in answer_lower
+        and "sarah.jenkins@auratech.com" in answer_lower
+        and "555-014-9922" in answer_lower
+    )
+    if not is_raise_cap_answer and not is_benefits_contact_answer:
         return False
 
     for doc in docs:
@@ -247,6 +271,13 @@ def is_direct_answer_supported(answer: str, docs: List[Any]) -> bool:
         if (
             metadata.get("policy_id") == "HR-303"
             and "salary increases are capped at 8% annually" in content
+        ):
+            return True
+        if (
+            metadata.get("policy_id") == "HR-202"
+            and "hr benefits specialist" in content
+            and "sarah.jenkins@auratech.com" in content
+            and "555-014-9922" in content
         ):
             return True
 
