@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AskGovRAGBot - Governed Policy Chatbot</title>
+    <!-- Google Fonts for Modern Premium Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Reference vanilla style.css sheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Background Animated Gradient Shapes for Glassmorphism Context -->
+    <div class="bg-gradient-orb orb-1"></div>
+    <div class="bg-gradient-orb orb-2"></div>
+    <div class="bg-gradient-orb orb-3"></div>
+
+    <!-- Main Container App Grid -->
+    <div class="app-container" id="app-container-root">
+        
+        <!-- SIDEBAR PANEL (Configurations and Live Node Tracing) -->
+        <aside class="sidebar-panel" id="sidebar-config-panel">
+            <div class="sidebar-header">
+                <h2>Configuration</h2>
+                <p>Governed Scaffolding Settings</p>
+            </div>
+            
+            <hr class="divider">
+            
+            <!-- RBAC Role Selector -->
+            <div class="form-group">
+                <label for="user-role-select">Active User Role</label>
+                <div class="select-wrapper">
+                    <select id="user-role-select">
+                        <option value="Contractor">Contractor (Level 1)</option>
+                        <option value="Employee" selected>Employee (Level 2)</option>
+                        <option value="Manager">Manager (Level 3)</option>
+                        <option value="Admin">Admin (Level 4)</option>
+                    </select>
+                </div>
+                <small class="helper-text">Simulates metadata permission gating bounds</small>
+            </div>
+
+            <!-- Session Thread ID Manager -->
+            <div class="form-group">
+                <label for="session-id-input">Conversation Session ID</label>
+                <input type="text" id="session-id-input" value="session-default-779" placeholder="Enter session identifier">
+                <small class="helper-text">Links messages to persistent SQLite memory threads</small>
+            </div>
+
+            <hr class="divider">
+
+            <!-- Real-time Agent Node Visited Trace Viewer -->
+            <div class="trace-viewer">
+                <div class="trace-header">
+                    <h3>Execution Trace Path</h3>
+                    <span class="status-badge live" id="live-trace-status">idle</span>
+                </div>
+                <p class="trace-intro">Visualizes nodes triggered in the LangGraph workflow:</p>
+                <div class="trace-timeline-container" id="trace-timeline-feed">
+                    <div class="empty-trace-placeholder" id="empty-trace-message">
+                        Submit a query to render node trace path.
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Info Footer inside Sidebar -->
+            <div class="sidebar-system-footer">
+                <div class="footer-stat">
+                    <span>Engine:</span>
+                    <strong id="env-db-mode">FastAPI + LangGraph</strong>
+                </div>
+                <div class="footer-stat">
+                    <span>Store:</span>
+                    <strong id="env-store-mode">Chroma DB (Local)</strong>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CHAT VIEWPORT -->
+        <main class="chat-viewport" id="chat-viewport-root">
+            <!-- Header section displaying Server health metrics -->
+            <header class="chat-header">
+                <div class="header-info">
+                    <h1>AuraTech Internal Portal</h1>
+                    <p class="subtitle">AskGovRAGBot — Governed Policy Assistant &amp; Compliance Ledger</p>
+                </div>
+                
+                <!-- Live Metrics dashboard pulled dynamically -->
+                <div class="metrics-dashboard" id="live-metrics-dashboard">
+                    <div class="metric-card">
+                        <span class="metric-label">PII Masked</span>
+                        <strong class="metric-value text-accent" id="metric-pii-masked">0</strong>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Judge Score</span>
+                        <strong class="metric-value text-success" id="metric-groundedness">1.0</strong>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Conversation message thread feed area -->
+            <div class="chat-message-feed" id="chat-messages-container">
+                <!-- Welcome system greeting card -->
+                <div class="system-welcome-card" id="system-welcome-element">
+                    <div class="welcome-icon">🛡️</div>
+                    <h2>Welcome to AuraTech AskGovRAGBot!</h2>
+                    <p>This governed internal portal handles policy retrieval, role-based metadata access control, and in-flight PII redaction.</p>
+                    <div class="features-grid">
+                        <div class="feature-item">
+                            <h4>🔑 Role-Based Access Control</h4>
+                            <p>Query results are strictly filtered based on the active user role configured in the sidebar.</p>
+                        </div>
+                        <div class="feature-item">
+                            <h4>🕵️ In-Flight PII Masking</h4>
+                            <p>Names, phone numbers, and emails are auto-anonymized in-flight prior to querying LLMs.</p>
+                        </div>
+                        <div class="feature-item">
+                            <h4>⚖️ Hallucination Guardrail</h4>
+                            <p>Answers are cross-checked against context via an LLM-as-a-judge node prior to client delivery.</p>
+                        </div>
+                        <div class="feature-item">
+                            <h4>💾 Persistent Audit Ledger</h4>
+                            <p>All checks, traces, and feedback are permanently logged to SQLite.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Demo Questions Section -->
+                    <div class="demo-questions-section">
+                        <h3>Quick Demo Queries (Click to Set Role)</h3>
+                        <div class="demo-questions-grid">
+                            <button type="button" class="demo-question-btn" data-role="Contractor" data-query="What is the budget cap for manager raises?">
+                                <strong>🔒 Gated Contractor Refusal</strong>
+                                <span>"What is the budget cap for manager raises?"</span>
+                            </button>
+                            <button type="button" class="demo-question-btn" data-role="Contractor" data-query="What are our general workforce conduct guidelines?">
+                                <strong>🟢 Allowed Contractor Retrieval</strong>
+                                <span>"What are our general workforce conduct guidelines?"</span>
+                            </button>
+                            <button type="button" class="demo-question-btn" data-role="Employee" data-query="Help me contact HR manager John Doe at john.doe@auratech.com about benefits.">
+                                <strong>🕵️ In-Flight PII Redaction</strong>
+                                <span>"Help me contact HR manager John Doe at john.doe@auratech.com about benefits."</span>
+                            </button>
+                            <button type="button" class="demo-question-btn" data-role="Manager" data-query="What is the budget limit for manager salary raises?">
+                                <strong>🚀 Allowed Manager Retrieval</strong>
+                                <span>"What is the budget limit for manager salary raises?"</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat input entry panel -->
+            <footer class="chat-input-panel" id="chat-input-panel-root">
+                <form class="chat-form" id="chat-form-element" onsubmit="return false;">
+                    <div class="input-wrapper">
+                        <textarea id="chat-input-box" rows="1" placeholder="Type a policy question (e.g., 'What is our code of conduct?') or casual greeting..." required></textarea>
+                        <button type="submit" class="btn-send" id="chat-submit-btn" aria-label="Send Message">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="input-actions-bar">
+                        <button type="button" class="btn-secondary" id="clear-chat-history-btn">Clear Thread</button>
+                        <span class="api-latency-indicator" id="network-latency-display">Latency: -- ms</span>
+                    </div>
+                </form>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Reference frontend JS application code -->
+    <script src="app.js"></script>
+</body>
+</html>
