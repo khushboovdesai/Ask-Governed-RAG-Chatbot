@@ -60,9 +60,32 @@ GROUNDEDNESS_REFUSAL = (
     "the policy owner."
 )
 
+MODEL_UNAVAILABLE_RESPONSE = (
+    "Model Availability Notice: The language model is temporarily unavailable, so I cannot "
+    "generate a complete response right now. Any detected PII was masked before model calls. "
+    "Please retry shortly."
+)
+
 # =============================================================================
 # 2. NODES IMPLEMENTATIONS
 # =============================================================================
+
+def classify_intent_deterministically(masked_query: str) -> str:
+    """Classifies intent locally when the LLM router is unavailable."""
+    low_query = masked_query.lower()
+    if any(w in low_query for w in ["inject", "ignore previous", "system prompt", "jailbreak", "hack"]):
+        return "refused"
+
+    policy_keywords = [
+        "conduct", "hybrid", "pto", "budget", "policy", "benefit", "benefits",
+        "vesting", "salary", "increase", "compensation", "manager", "hr",
+        "handbook", "password", "security", "code review", "workforce",
+        "employee role", "contractor role", "admin role",
+    ]
+    if any(w in low_query for w in policy_keywords):
+        return "policy_qa"
+
+    return "general_chat"
 
 def pii_masking_node(state: AgentState) -> Dict[str, Any]:
     """Scans and masks PII in the query using PIISecurityManager."""
@@ -89,19 +112,7 @@ def intent_routing_node(state: AgentState) -> Dict[str, Any]:
     
     # If using fallback model, bypass or check text directly
     if llm.__class__.__name__ == "FallbackOfflineChatModel":
-        # Check basic words
-        low_query = masked_query.lower()
-        policy_keywords = [
-            "conduct", "hybrid", "pto", "budget", "policy", "benefit", 
-            "vesting", "salary", "increase", "compensation", "manager", 
-            "handbook", "password", "security", "code review", "workforce"
-        ]
-        if any(w in low_query for w in policy_keywords):
-            intent = "policy_qa"
-        elif any(w in low_query for w in ["inject", "ignore previous", "system prompt", "hack"]):
-            intent = "refused"
-        else:
-            intent = "general_chat"
+        intent = classify_intent_deterministically(masked_query)
     else:
         # Structured classification prompt for production models
         system_prompt = (
@@ -128,8 +139,8 @@ def intent_routing_node(state: AgentState) -> Dict[str, Any]:
             data = json.loads(content)
             intent = data.get("intent", "general_chat")
         except Exception as e:
-            print(f"[WARNING] Intent routing parsing failed ({e}). Defaulting to general_chat.")
-            intent = "general_chat"
+            print(f"[WARNING] Intent routing failed ({e}). Falling back to deterministic routing.")
+            intent = classify_intent_deterministically(masked_query)
             
     return {
         "intent": intent,
@@ -269,7 +280,8 @@ def qa_synthesis_node(state: AgentState) -> Dict[str, Any]:
         ])
         answer = response.content
     except Exception as e:
-        answer = f"Error generating answer: {e}"
+        print(f"[WARNING] QA synthesis model call failed ({e}).")
+        answer = MODEL_UNAVAILABLE_RESPONSE
         
     return {
         "generated_answer": answer,
@@ -294,7 +306,8 @@ def general_chat_node(state: AgentState) -> Dict[str, Any]:
         ])
         answer = response.content
     except Exception as e:
-        answer = f"Error generating response: {e}"
+        print(f"[WARNING] General chat model call failed ({e}).")
+        answer = MODEL_UNAVAILABLE_RESPONSE
         
     return {
         "generated_answer": answer,
@@ -329,6 +342,7 @@ def output_guardrail_node(state: AgentState) -> Dict[str, Any]:
         or "Request Refused" in answer
         or "cannot verify this policy" in answer
         or "Guardrail:" in answer
+        or "Model Availability Notice:" in answer
     ):
         return {
             "is_grounded": True,

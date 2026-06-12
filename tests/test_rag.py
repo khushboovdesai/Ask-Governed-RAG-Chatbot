@@ -28,7 +28,10 @@ from app.config import settings
 from app.security import pii_manager
 from app.database import init_db, log_feedback, log_interaction, get_db_connection
 from app.graph import (
+    MODEL_UNAVAILABLE_RESPONSE,
+    classify_intent_deterministically,
     compiled_graph,
+    general_chat_node,
     route_intent_conditional,
     extract_direct_supported_answer,
     is_direct_answer_supported,
@@ -100,6 +103,35 @@ def test_route_intent_conditional_cases():
     # 3. Casual chat case
     state_casual = {"intent": "general_chat", "query": "hello"}
     assert route_intent_conditional(state_casual) == "general_chat"
+
+def test_deterministic_intent_routes_pii_benefits_question_to_policy():
+    """
+    Ensures PII-heavy HR/benefits requests still route to policy retrieval when
+    the LLM router is unavailable or rate limited.
+    """
+    masked_text, _ = pii_manager.mask_pii(
+        "Help me contact HR manager John Doe at john.doe@auratech.com about benefits via employee role"
+    )
+
+    assert classify_intent_deterministically(masked_text) == "policy_qa"
+
+def test_model_failure_returns_safe_availability_message(monkeypatch):
+    """
+    Ensures provider 503/rate-limit errors are not exposed directly to users.
+    """
+    class FailingChatModel:
+        def invoke(self, messages):
+            raise RuntimeError("503 UNAVAILABLE: high demand")
+
+    monkeypatch.setattr("app.graph.get_chat_model", lambda: FailingChatModel())
+
+    result = general_chat_node({
+        "masked_query": "Hello",
+        "nodes_visited": [],
+    })
+
+    assert result["generated_answer"] == MODEL_UNAVAILABLE_RESPONSE
+    assert "503" not in result["generated_answer"]
 
 # =============================================================================
 # 3. DATABASE LEDGER PERSISTENCE TESTS
